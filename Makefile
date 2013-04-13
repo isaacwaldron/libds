@@ -1,31 +1,48 @@
-.DEFAULT: all
-.PHONY: all dirs objs clean test
+# libds Makefile
+# Copyright (c) 2013 Isaac Waldron
 
-all: dirs lib/libds.so test
+CC=gcc
 
+OBJDIR=obj
+OBJS=hashtable.o
+
+LIBDIR=lib
+LIBVER_MAJOR=1
+LIBVER_MINOR=0
+LIBVER_PATCH=0
+LIBNAME=libds.so
+LIBNAME_FULL=$(LIBNAME).$(LIBVER_MAJOR).$(LIBVER_MINOR).$(LIBVER_PATCH)
+
+BINDIR=bin
+SRCDIR=src
+INCLUDEDIR=include
+TESTDIR=test
+
+TESTS=libds_hashtable_test
+
+DIRS=$(BINDIR) $(LIBDIR) $(OBJDIR)
+
+.PHONY: dirs clean test
+
+$(LIBDIR)/$(LIBNAME): $(LIBDIR)/$(LIBNAME_FULL)
+	-ln -s $(LIBNAME_FULL) $@
+
+$(LIBDIR)/$(LIBNAME_FULL): $(OBJDIR)/$(OBJS)
+	$(CC) -shared -o $@ $<
+	
 dirs:
-	-mkdir bin/
-	-mkdir lib/
-	-mkdir obj/
-	
-lib/libds.so: objs
-	gcc -shared -o lib/libds.so.1 obj/hashtable.o
-	-ln -s libds.so.1 lib/libds.so
+	-mkdir $(DIRS)
 
-objs: obj/hashtable.o
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(INCLUDEDIR)/*.h dirs
+	$(CC) -c -o $@ $< -I $(INCLUDEDIR) -fPIC
 
-obj/hashtable.o: src/hashtable.c include/hashtable.h
-	gcc -c -o obj/hashtable.o src/hashtable.c -I include -fPIC
-	
-test: bin/libds_hashtable_test
+test: $(BINDIR)/$(TESTS)
 
-bin/libds_hashtable_test: include/libds.h lib/libds.so test/hashtable/libds_hashtable_test.c
-	gcc -o bin/libds_hashtable_test test/hashtable/libds_hashtable_test.c -I include -L lib -lds
+$(BINDIR)/%: $(TESTDIR)/%.c $(INCLUDEDIR)/*.h dirs
+	$(CC) -o $@ $< -I $(INCLUDEDIR) -L $(LIBDIR) -lds
 
 clean:
-	-rm bin/*
-	rmdir bin/
-	-rm lib/*
-	rmdir lib/
-	-rm obj/*
-	rmdir obj/
+	-rm $(BINDIR)/*
+	-rm $(LIBDIR)/*
+	-rm $(OBJDIR)/*
+	-rmdir $(DIRS)
