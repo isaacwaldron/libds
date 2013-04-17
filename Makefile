@@ -27,7 +27,7 @@ DIRS=$(BINDIR) $(LIBDIR) $(OBJDIR)
 $(LIBDIR)/$(LIBNAME): $(LIBDIR)/$(LIBNAME_FULL)
 	-ln -s $(LIBNAME_FULL) $@
 
-$(LIBDIR)/$(LIBNAME_FULL): $(OBJDIR)/$(OBJS)
+$(LIBDIR)/$(LIBNAME_FULL): $(addprefix $(OBJDIR)/, $(OBJS))
 	$(CC) -shared -o $@ $<
 	
 dirs:
@@ -36,7 +36,7 @@ dirs:
 $(OBJDIR)/%.o: $(SRCDIR)/%.c $(INCLUDEDIR)/*.h dirs
 	$(CC) -c -o $@ $< -I $(INCLUDEDIR) -fPIC
 
-test: $(BINDIR)/$(TESTS)
+test: $(addprefix $(BINDIR)/, $(TESTS))
 
 $(BINDIR)/%: $(TESTDIR)/%.c $(INCLUDEDIR)/*.h dirs
 	$(CC) -o $@ $< -I $(INCLUDEDIR) -L $(LIBDIR) -lds

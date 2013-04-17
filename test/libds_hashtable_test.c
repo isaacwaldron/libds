@@ -8,7 +8,7 @@
 
 #include "libds.h"
 
-#define TEST_HASHTABLE_SIZE 16384
+#define TEST_HASHTABLE_SIZE 32768
 #define TEST_HASHTABLE_ARRAY_SIZE 1000000
 
 size_t inthash(const void *key)
@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 				fprintf(stdout, "Confirmed %ld -> %ld\n", \
 					numbers[2*i], numbers[2*i + 1]);
 
+	hashtable_destroy(table);
 	free(numbers);
 	
 	return 0;
